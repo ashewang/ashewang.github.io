@@ -77,7 +77,11 @@
     p { margin: 0 0 16px; }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .links { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+    .nav, .links { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+    .nav a {
+      border: 1px solid var(--line); border-radius: 999px;
+      padding: 4px 13px; background: #fff;
+    }
     .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 0; }
     .chip {
       background: var(--chip); color: var(--accent); font-size: 0.8rem;
@@ -107,14 +111,19 @@
         <div class="card red"   style="--rot:10deg;  animation-delay:0.75s"><span class="rank">10</span><span class="pip">&hearts;</span></div>
       </div>
 
+      <nav class="nav" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#blogs">Blogs</a>
+      </nav>
+
       <div class="links">
         <a href="https://github.com/ashewang">GitHub</a>
-        <a href="mailto:you@example.com">Email</a>
-        <a href="#">LinkedIn</a>
+        <a href="https://www.linkedin.com/in/ashe-wang-999b45132/">LinkedIn</a>
       </div>
     </header>
 
-    <section>
+    <section id="about">
       <h2>About</h2>
       <p>
         I'm a software engineer and a builder &mdash; I like turning ideas into
@@ -134,9 +143,20 @@
       </div>
     </section>
 
-    <section>
+    <section id="projects">
       <h2>Projects</h2>
       <p>Coming soon.</p>
+    </section>
+
+    <section id="blogs">
+      <h2>Blogs</h2>
+      <article class="project">
+        <h3>Ideas notebook</h3>
+        <p>
+          A place for short notes on software, LLMs, poker, and whatever else
+          I am thinking through.
+        </p>
+      </article>
     </section>
 
     <footer>
