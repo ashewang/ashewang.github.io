@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Anshu Wang</title>
+  <title>Anshu Wang &middot; code &amp; cards</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23d23b3b' d='M50 30 C50 14 29 9 19 22 C9 35 20 51 50 80 C80 51 91 35 81 22 C71 9 50 14 50 30 Z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --ink: #1a1a1a;
@@ -15,16 +19,27 @@
       --red: #d23b3b;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
       color: var(--ink);
       background: var(--bg);
-      line-height: 1.65;
+      line-height: 1.7;
     }
-    .wrap { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
-    header { margin-bottom: 40px; }
-    h1 { font-size: 2.2rem; margin: 0 0 6px; letter-spacing: -0.02em; }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--red));
+      z-index: 10;
+    }
+    ::selection { background: var(--chip); color: var(--accent); }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 88px 28px 120px; }
+    header { margin-bottom: 48px; }
+    h1 {
+      font-family: "Fraunces", Georgia, "Times New Roman", serif;
+      font-size: 2.8rem; font-weight: 700;
+      margin: 0 0 8px; letter-spacing: -0.02em; line-height: 1.15;
+    }
     .tagline {
       color: var(--muted); font-size: 1.05rem; margin: 0;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -71,30 +86,50 @@
     }
 
     h2 {
-      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--muted); margin: 48px 0 16px; font-weight: 600;
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--muted); margin: 56px 0 18px; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2::before {
+      content: "\2666"; color: var(--red); font-size: 0.75em;
+    }
+    h2::after {
+      content: ""; flex: 1; height: 1px; background: var(--line);
     }
     p { margin: 0 0 16px; }
     a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .nav, .links { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+    a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .nav, .links { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+    .links { gap: 20px; }
     .nav a {
       border: 1px solid var(--line); border-radius: 999px;
-      padding: 4px 13px; background: #fff;
+      padding: 5px 15px; background: #fff;
+      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .nav a:hover {
+      border-color: var(--accent); background: var(--chip);
+      text-decoration: none; transform: translateY(-1px);
     }
     .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 0; }
     .chip {
       background: var(--chip); color: var(--accent); font-size: 0.8rem;
       padding: 3px 11px; border-radius: 999px;
     }
-    .project { padding: 18px 0; border-top: 1px solid var(--line); }
+    .project {
+      padding: 18px 16px; margin: 0 -16px; border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .project:hover { background: #fff; }
     .project h3 { margin: 0 0 4px; font-size: 1.05rem; }
     .project p { margin: 0 0 6px; color: var(--muted); font-size: 0.95rem; }
     .project .links { margin-top: 4px; font-size: 0.9rem; }
     footer {
-      margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line);
-      color: var(--muted); font-size: 0.9rem;
+      margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+      color: var(--muted); font-size: 0.88rem;
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
     }
+    footer .suits { letter-spacing: 4px; }
+    footer .suits .r { color: var(--red); }
   </style>
 </head>
 <body>
@@ -160,7 +195,8 @@
     </section>
 
     <footer>
-      &copy; 2026 Anshu Wang &middot; Built with GitHub Pages
+      <span>&copy; 2026 Anshu Wang &middot; Built with GitHub Pages</span>
+      <span class="suits" aria-hidden="true"><span class="r">&hearts;</span>&spades;<span class="r">&diams;</span>&clubs;</span>
     </footer>
   </div>
 
