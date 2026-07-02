@@ -20,6 +20,10 @@
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    #bg {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      z-index: -1; pointer-events: none; display: block;
+    }
     body {
       margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -147,6 +151,7 @@
   </style>
 </head>
 <body>
+  <canvas id="bg" aria-hidden="true"></canvas>
   <nav class="topnav" aria-label="Primary">
     <div class="topnav-inner">
       <a class="brand" href="#"><span class="suit" aria-hidden="true">&hearts;</span>AW</a>
@@ -177,14 +182,13 @@
     <section id="about">
       <h2>About</h2>
       <p>
-        I'm a software engineer and a builder &mdash; I like turning ideas into
-        things people can actually use. Lately I've been diving deep into large
-        language models, both how they work under the hood and what you can
-        build on top of them.
+        Software engineer. I build things, then take them apart to see why
+        they worked. Currently deep in LLM internals &mdash; attention maps,
+        sampling tricks, and whatever else is under the hood.
       </p>
       <p>
-        Outside of LLM work, a lot of my projects orbit around poker: modeling
-        the game, building tools, and exploring where strategy meets code.
+        Side quest: poker. Game trees, solvers, EV math &mdash; the fun part
+        is where the strategy compiles.
       </p>
       <div class="chips">
         <span class="chip">LLMs</span>
@@ -237,6 +241,220 @@
         setTimeout(tick, deleting ? 45 : 85);
       }
       tick();
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var canvas = document.getElementById("bg");
+      var gl = canvas.getContext("webgl", { antialias: true, alpha: false });
+      if (!gl) return;
+
+      var VERT = [
+        "attribute vec2 a;",
+        "void main() { gl_Position = vec4(a, 0.0, 1.0); }"
+      ].join("\n");
+
+      var FRAG = [
+        "precision mediump float;",
+        "uniform float u_time;",
+        "uniform vec2 u_mouse;",
+        "uniform float u_cell;",
+        "uniform vec3 u_ripples[6];",
+        "",
+        "float hash21(vec2 p) {",
+        "  p = fract(p * vec2(123.34, 456.21));",
+        "  p += dot(p, p + 45.32);",
+        "  return fract(p.x * p.y);",
+        "}",
+        "float dot2(vec2 v) { return dot(v, v); }",
+        "float ndot(vec2 a, vec2 b) { return a.x*b.x - a.y*b.y; }",
+        "",
+        "float sdHeart(vec2 p) {",
+        "  p.x = abs(p.x);",
+        "  if (p.y + p.x > 1.0)",
+        "    return sqrt(dot2(p - vec2(0.25, 0.75))) - sqrt(2.0) / 4.0;",
+        "  return sqrt(min(dot2(p - vec2(0.0, 1.0)), dot2(p - 0.5*max(p.x + p.y, 0.0)))) * sign(p.x - p.y);",
+        "}",
+        "float sdRhombus(vec2 p, vec2 b) {",
+        "  p = abs(p);",
+        "  float h = clamp(ndot(b - 2.0*p, b) / dot(b, b), -1.0, 1.0);",
+        "  float d = length(p - 0.5*b*vec2(1.0 - h, 1.0 + h));",
+        "  return d * sign(p.x*b.y + p.y*b.x - b.x*b.y);",
+        "}",
+        "float sdCircle(vec2 p, float r) { return length(p) - r; }",
+        "",
+        "float sdSuit(vec2 p, float suit) {",
+        "  if (suit < 0.5) {",
+        "    return sdHeart(vec2(p.x * 1.2, p.y * 1.2 + 0.55)) / 1.2;",
+        "  } else if (suit < 1.5) {",
+        "    return sdRhombus(p, vec2(0.30, 0.45));",
+        "  } else if (suit < 2.5) {",
+        "    float body = sdHeart(vec2(p.x * 1.3, 0.62 - p.y * 1.3)) / 1.3;",
+        "    float stem = sdRhombus(p - vec2(0.0, -0.38), vec2(0.15, 0.17));",
+        "    return min(body, stem);",
+        "  } else {",
+        "    float d = sdCircle(p - vec2(0.0, 0.20), 0.185);",
+        "    d = min(d, sdCircle(p - vec2(-0.17, -0.06), 0.185));",
+        "    d = min(d, sdCircle(p - vec2(0.17, -0.06), 0.185));",
+        "    d = min(d, sdRhombus(p - vec2(0.0, -0.33), vec2(0.13, 0.19)));",
+        "    return d;",
+        "  }",
+        "}",
+        "",
+        "void main() {",
+        "  vec2 fc = gl_FragCoord.xy;",
+        "  vec2 gv = fc / u_cell;",
+        "  float stag = mod(floor(gv.y), 2.0) * 0.5;",
+        "  gv.x += stag;",
+        "  vec2 id = floor(gv);",
+        "  vec2 f = fract(gv) - 0.5;",
+        "  vec2 center = (id + vec2(0.5 - stag, 0.5)) * u_cell;",
+        "",
+        "  float h = hash21(id);",
+        "  float suit = floor(hash21(id + 7.13) * 4.0);",
+        "  float phase = h * 6.2831;",
+        "",
+        "  float dm = distance(center, u_mouse);",
+        "  float mR = 2.8 * u_cell;",
+        "  float energy = smoothstep(mR, mR * 0.15, dm);",
+        "",
+        "  for (int i = 0; i < 6; i++) {",
+        "    vec3 rp = u_ripples[i];",
+        "    float age = u_time - rp.z;",
+        "    if (rp.z > 0.0 && age > 0.0 && age < 2.2) {",
+        "      float rad = age * 6.0 * u_cell;",
+        "      float dr = abs(distance(center, rp.xy) - rad);",
+        "      float band = exp(-dr * dr / (u_cell * u_cell * 1.4));",
+        "      energy += band * (1.0 - age / 2.2);",
+        "    }",
+        "  }",
+        "  energy = clamp(energy, 0.0, 1.0);",
+        "",
+        "  f.y += 0.04 * sin(u_time * 0.7 + phase * 2.0);",
+        "  vec2 toMouse = u_mouse - center;",
+        "  float tl = max(length(toMouse), 1e-3);",
+        "  f -= (toMouse / tl) * energy * 0.10;",
+        "",
+        "  float ang = 0.18 * sin(u_time * 0.6 + phase) * (0.4 + 0.6 * h);",
+        "  float cs = cos(ang), sn = sin(ang);",
+        "  f = mat2(cs, -sn, sn, cs) * f;",
+        "",
+        "  float size = 0.60 * (0.85 + 0.3 * h) * (1.0 + 0.35 * energy);",
+        "  float d = sdSuit(f / size, suit) * size * u_cell;",
+        "  float aa = 1.5;",
+        "  float mask = smoothstep(aa, -aa, d);",
+        "",
+        "  vec3 bg = vec3(0.984, 0.984, 0.976);",
+        "  vec3 idle = vec3(0.902, 0.896, 0.875);",
+        "  vec3 red = vec3(0.824, 0.231, 0.231);",
+        "  vec3 ink = vec3(0.24, 0.24, 0.25);",
+        "  vec3 suitCol = suit < 1.5 ? red : ink;",
+        "  vec3 col = mix(idle, suitCol, energy);",
+        "  float alpha = mix(0.85, 0.72, energy);",
+        "",
+        "  gl_FragColor = vec4(mix(bg, col, mask * alpha), 1.0);",
+        "}"
+      ].join("\n");
+
+      function compile(type, src) {
+        var s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+          return null;
+        }
+        return s;
+      }
+      var vs = compile(gl.VERTEX_SHADER, VERT);
+      var fs = compile(gl.FRAGMENT_SHADER, FRAG);
+      if (!vs || !fs) return;
+      var prog = gl.createProgram();
+      gl.attachShader(prog, vs);
+      gl.attachShader(prog, fs);
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+      gl.useProgram(prog);
+
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(prog, "a");
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+      var uTime = gl.getUniformLocation(prog, "u_time");
+      var uMouse = gl.getUniformLocation(prog, "u_mouse");
+      var uCell = gl.getUniformLocation(prog, "u_cell");
+      var uRipples = gl.getUniformLocation(prog, "u_ripples");
+
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var mouse = { x: -1e5, y: -1e5, tx: -1e5, ty: -1e5 };
+      var ripples = new Float32Array(18).fill(-100);
+      var rippleIdx = 0;
+      var start = performance.now();
+      var raf = null;
+
+      function resize() {
+        var w = Math.floor(window.innerWidth * dpr);
+        var hh = Math.floor(window.innerHeight * dpr);
+        if (canvas.width !== w || canvas.height !== hh) {
+          canvas.width = w;
+          canvas.height = hh;
+          gl.viewport(0, 0, w, hh);
+        }
+      }
+
+      function now() { return (performance.now() - start) / 1000; }
+
+      function draw(t) {
+        // first mouse event snaps instead of gliding in from off-screen
+        if (mouse.x < -1e4 && mouse.tx > -1e4) { mouse.x = mouse.tx; mouse.y = mouse.ty; }
+        mouse.x += (mouse.tx - mouse.x) * 0.12;
+        mouse.y += (mouse.ty - mouse.y) * 0.12;
+        gl.uniform1f(uTime, t);
+        gl.uniform2f(uMouse, mouse.x, mouse.y);
+        gl.uniform1f(uCell, 88 * dpr);
+        gl.uniform3fv(uRipples, ripples);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+
+      function loop() {
+        raf = requestAnimationFrame(loop);
+        draw(now());
+      }
+
+      window.addEventListener("pointermove", function (e) {
+        mouse.tx = e.clientX * dpr;
+        mouse.ty = canvas.height - e.clientY * dpr;
+      });
+      window.addEventListener("pointerdown", function (e) {
+        if (reduce) return;
+        ripples[rippleIdx * 3] = e.clientX * dpr;
+        ripples[rippleIdx * 3 + 1] = canvas.height - e.clientY * dpr;
+        ripples[rippleIdx * 3 + 2] = now();
+        rippleIdx = (rippleIdx + 1) % 6;
+      });
+      window.addEventListener("resize", function () {
+        resize();
+        if (reduce) draw(0);
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (reduce) return;
+        if (document.hidden) {
+          if (raf) { cancelAnimationFrame(raf); raf = null; }
+        } else if (!raf) {
+          loop();
+        }
+      });
+
+      resize();
+      if (reduce) {
+        draw(0);
+      } else {
+        loop();
+      }
     })();
   </script>
 </body>
