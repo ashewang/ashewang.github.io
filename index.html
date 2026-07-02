@@ -33,7 +33,31 @@
       z-index: 10;
     }
     ::selection { background: var(--chip); color: var(--accent); }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 88px 28px 120px; }
+    .topnav {
+      position: sticky; top: 4px; z-index: 9;
+      background: rgba(251,251,249,0.85);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topnav-inner {
+      max-width: 720px; margin: 0 auto; padding: 13px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand {
+      font-family: "Fraunces", Georgia, serif; font-weight: 700;
+      font-size: 1.1rem; color: var(--ink); letter-spacing: -0.01em;
+    }
+    .brand:hover { text-decoration: none; color: var(--accent); }
+    .brand .suit { color: var(--red); margin-right: 2px; }
+    .topnav-links {
+      display: flex; gap: 18px; align-items: center;
+      font-size: 0.92rem; flex-wrap: wrap;
+    }
+    .topnav-links a { color: var(--muted); font-weight: 500; }
+    .topnav-links a:hover { color: var(--accent); text-decoration: none; }
+    .topnav-links .sep { width: 1px; height: 14px; background: var(--line); }
+    section { scroll-margin-top: 76px; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 64px 28px 120px; }
     header { margin-bottom: 48px; }
     h1 {
       font-family: "Fraunces", Georgia, "Times New Roman", serif;
@@ -99,17 +123,7 @@
     p { margin: 0 0 16px; }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; text-underline-offset: 3px; }
-    .nav, .links { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-    .links { gap: 20px; }
-    .nav a {
-      border: 1px solid var(--line); border-radius: 999px;
-      padding: 5px 15px; background: #fff;
-      transition: border-color 0.15s, background 0.15s, transform 0.15s;
-    }
-    .nav a:hover {
-      border-color: var(--accent); background: var(--chip);
-      text-decoration: none; transform: translateY(-1px);
-    }
+    .links { display: flex; gap: 20px; flex-wrap: wrap; }
     .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 0; }
     .chip {
       background: var(--chip); color: var(--accent); font-size: 0.8rem;
@@ -133,6 +147,19 @@
   </style>
 </head>
 <body>
+  <nav class="topnav" aria-label="Primary">
+    <div class="topnav-inner">
+      <a class="brand" href="#"><span class="suit" aria-hidden="true">&hearts;</span>AW</a>
+      <div class="topnav-links">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#blogs">Blogs</a>
+        <span class="sep" aria-hidden="true"></span>
+        <a href="https://github.com/ashewang">GitHub</a>
+        <a href="https://www.linkedin.com/in/ashe-wang-999b45132/">LinkedIn</a>
+      </div>
+    </div>
+  </nav>
   <div class="wrap">
     <header>
       <h1>Anshu Wang</h1>
@@ -144,17 +171,6 @@
         <div class="card red"   style="--rot:0deg;   animation-delay:0.45s"><span class="rank">Q</span><span class="pip">&hearts;</span></div>
         <div class="card red"   style="--rot:5deg;   animation-delay:0.60s"><span class="rank">J</span><span class="pip">&hearts;</span></div>
         <div class="card red"   style="--rot:10deg;  animation-delay:0.75s"><span class="rank">10</span><span class="pip">&hearts;</span></div>
-      </div>
-
-      <nav class="nav" aria-label="Primary">
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#blogs">Blogs</a>
-      </nav>
-
-      <div class="links">
-        <a href="https://github.com/ashewang">GitHub</a>
-        <a href="https://www.linkedin.com/in/ashe-wang-999b45132/">LinkedIn</a>
       </div>
     </header>
 
