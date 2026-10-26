@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Anshu Wang — software engineer interested in LLMs, machine learning, and poker. Personal projects and links.">
+  <meta name="description" content="Anshu Wang — software engineer working on AI agents, memory, context engineering, tool use, and evaluation. Personal projects and working notes.">
   <meta name="theme-color" content="#f8f7f4">
   <title>Anshu Wang</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f8f7f4'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='Georgia,serif' font-size='48' fill='%23272d29'%3EA%3C/text%3E%3C/svg%3E">
@@ -58,7 +58,7 @@
     .page {
       max-width: 704px;
       margin: 0 auto;
-      padding: 112px 32px 48px;
+      padding: 88px 32px 48px;
     }
 
     .role {
@@ -94,7 +94,7 @@
 
     .bio .interests { color: var(--muted); }
 
-    .projects { margin-top: 72px; }
+    .projects { margin-top: 52px; }
 
     h2 {
       margin: 0 0 22px;
@@ -116,14 +116,28 @@
     .project-link {
       display: flex;
       align-items: baseline;
-      justify-content: space-between;
-      gap: 24px;
+      gap: 12px;
       min-height: 32px;
       text-decoration: none;
     }
 
     .project-link:hover .project-name { text-decoration: underline; text-underline-offset: 5px; }
-    .project-arrow { color: var(--accent); font-size: 20px; font-weight: 400; }
+    .project-symbol {
+      color: var(--accent);
+      font-family: Georgia, serif;
+      font-size: 23px;
+      font-weight: 400;
+      transition: transform 150ms ease;
+    }
+    .project-link:hover .project-symbol { transform: rotate(-12deg); }
+    .project-arrow {
+      margin-left: auto;
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 400;
+      transition: transform 150ms ease;
+    }
+    .project-link:hover .project-arrow { transform: translate(2px, -2px); }
 
     .project p {
       max-width: 58ch;
@@ -148,11 +162,84 @@
     .socials a { display: inline-flex; align-items: center; min-height: 44px; }
     .copyright { margin: 0; font-size: 12px; }
 
+    .notebook {
+      margin-top: 36px;
+      padding: 22px 24px 24px;
+      border: 1px solid #daddcf;
+      border-radius: 5px;
+      background: #f0f1e9;
+    }
+
+    .notebook-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 15px;
+    }
+
+    .notebook h2 { margin: 0; font-size: 10px; }
+    .notebook-hint { color: var(--muted); font-size: 11px; }
+
+    .topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #daddcf;
+    }
+
+    .topic {
+      position: relative;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 5px 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .topic:hover { color: var(--ink); }
+    .topic[aria-pressed="true"] { color: var(--accent); font-weight: 600; }
+    .topic[aria-pressed="true"]::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -13px;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    .topic:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+    .note-content { min-height: 107px; padding-top: 18px; }
+    .note-title {
+      margin: 0 0 7px;
+      font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+    .note p { max-width: 58ch; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .project-symbol, .project-arrow { transition: none; }
+      .project-link:hover .project-symbol, .project-link:hover .project-arrow { transform: none; }
+    }
+
     @media (max-width: 480px) {
       .page { padding: 64px 24px 32px; }
       .bio .lead { font-size: 19px; }
       .bio p { font-size: 16px; }
       .projects { margin-top: 52px; }
+      .notebook { padding: 20px; }
+      .topics { justify-content: space-between; gap: 8px; }
+      .note-content { min-height: 150px; }
       footer { margin-top: 32px; gap: 16px; }
     }
   </style>
@@ -164,27 +251,58 @@
       <p class="role">Software engineer</p>
       <h1>Anshu Wang</h1>
       <div class="bio">
-        <p class="lead">I build things, then take them apart to see why they worked.</p>
+        <p class="lead">I build agents that keep the thread.</p>
         <p class="interests">
-          My work centers on AI agents&mdash;memory, context engineering,
-          tool use, and evaluation. I focus on how these pieces come together
-          to support reliable behavior over complex tasks.
+          My work spans agent memory, context engineering, tool use, and
+          evals&mdash;helping agents keep their bearings through long, messy tasks.
         </p>
       </div>
     </header>
+
+    <section class="notebook" aria-labelledby="notebook-heading">
+      <div class="notebook-heading">
+        <h2 id="notebook-heading">Agent notebook</h2>
+        <span class="notebook-hint">Pick a topic</span>
+      </div>
+      <div class="topics" role="group" aria-label="Agent notebook topics">
+        <button class="topic" type="button" aria-pressed="true" aria-controls="note-memory">Memory</button>
+        <button class="topic" type="button" aria-pressed="false" aria-controls="note-context">Context</button>
+        <button class="topic" type="button" aria-pressed="false" aria-controls="note-tools">Tools</button>
+        <button class="topic" type="button" aria-pressed="false" aria-controls="note-evals">Evals</button>
+      </div>
+      <div class="note-content" aria-live="polite" aria-atomic="true">
+        <article class="note" id="note-memory">
+          <h3 class="note-title">Remember the useful part.</h3>
+          <p>Carry forward decisions, preferences, and lessons&mdash;with enough provenance to revisit them.</p>
+        </article>
+        <article class="note" id="note-context" hidden>
+          <h3 class="note-title">Give attention a budget.</h3>
+          <p>Keep the goal and recent actions close. Make room for what the next step needs.</p>
+        </article>
+        <article class="note" id="note-tools" hidden>
+          <h3 class="note-title">Make intent concrete.</h3>
+          <p>Clear inputs, explicit state, and outcomes an agent can check before taking the next step.</p>
+        </article>
+        <article class="note" id="note-evals" hidden>
+          <h3 class="note-title">Read the whole attempt.</h3>
+          <p>Follow the trajectory, inspect the failures, and check whether the task got done.</p>
+        </article>
+      </div>
+    </section>
 
     <section class="projects" id="projects" aria-labelledby="projects-heading">
       <h2 id="projects-heading">Personal projects</h2>
       <article class="project">
         <h3>
           <a class="project-link" href="https://pokertracker-ashewang.web.app/">
+            <span class="project-symbol" aria-hidden="true">&spades;</span>
             <span class="project-name">Poker Tracker</span>
             <span class="project-arrow" aria-hidden="true">&nearr;</span>
           </a>
         </h3>
         <p>
-          A private poker ledger for cash games and tournaments. Live session
-          tracking, profit statistics, and sharing with friends.
+          A poker ledger for the long game. Track live sessions, see results
+          clearly, and share selected sessions with friends.
         </p>
       </article>
     </section>
@@ -197,5 +315,20 @@
       <p class="copyright">&copy; 2026 Anshu Wang</p>
     </footer>
   </main>
+  <script>
+    (function () {
+      var notebook = document.querySelector('.notebook');
+      var topics = notebook.querySelectorAll('.topic');
+      topics.forEach(function (topic) {
+        topic.addEventListener('click', function () {
+          topics.forEach(function (button) {
+            var selected = button === topic;
+            button.setAttribute('aria-pressed', String(selected));
+            document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
