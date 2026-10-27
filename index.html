@@ -164,9 +164,9 @@
 
     .notebook {
       margin-top: 36px;
-      padding: 22px 24px 24px;
+      padding: 22px 24px 12px;
       border: 1px solid #daddcf;
-      border-radius: 5px;
+      border-radius: 12px;
       background: #f0f1e9;
     }
 
@@ -175,48 +175,76 @@
       align-items: baseline;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .notebook h2 { margin: 0; font-size: 10px; }
     .notebook-hint { color: var(--muted); font-size: 11px; }
 
     .topics {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #daddcf;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
     }
 
     .topic {
+      --topic-color: #4c614b;
+      --topic-paper: #e2e8d9;
       position: relative;
-      min-width: 44px;
-      min-height: 44px;
-      padding: 5px 0;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 0;
+      min-height: 54px;
+      padding: 12px 8px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: var(--topic-paper);
+      color: var(--topic-color);
       cursor: pointer;
       font: inherit;
       font-size: 13px;
-      line-height: 1.8;
+      font-weight: 500;
+      line-height: 1.4;
+      transition: transform 220ms cubic-bezier(.2, .8, .3, 1.5), box-shadow 220ms ease, border-color 220ms ease;
     }
 
-    .topic:hover { color: var(--ink); }
-    .topic[aria-pressed="true"] { color: var(--accent); font-weight: 600; }
-    .topic[aria-pressed="true"]::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      bottom: -13px;
-      left: 0;
-      height: 2px;
-      background: var(--accent);
+    .topic:nth-child(2) { --topic-color: #4e657d; --topic-paper: #e1e8ed; }
+    .topic:nth-child(3) { --topic-color: #85582f; --topic-paper: #efe3cf; }
+    .topic:nth-child(4) { --topic-color: #725875; --topic-paper: #eae0eb; }
+    .topic:hover { transform: translateY(-3px) rotate(-2deg); }
+    .topic:nth-child(even):hover { transform: translateY(-3px) rotate(2deg); }
+    .topic:active { transform: translateY(1px) scale(.97); }
+    .topic[aria-selected="true"] {
+      border-color: currentColor;
+      box-shadow: 0 3px 0 color-mix(in srgb, var(--topic-color) 20%, transparent);
+      font-weight: 600;
     }
     .topic:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
-    .note-content { min-height: 107px; padding-top: 18px; }
+    .topic-icon {
+      width: 19px;
+      height: 19px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .note-content { padding-top: 12px; }
+    .note {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 128px;
+      align-items: center;
+      gap: 20px;
+      min-height: 166px;
+      animation: note-arrive 320ms ease both;
+    }
+    .note[hidden] { display: none; }
+    .note:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
     .note-title {
       margin: 0 0 7px;
       font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
@@ -227,9 +255,40 @@
     }
     .note p { max-width: 58ch; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
 
+    .note-sketch {
+      width: 128px;
+      height: 128px;
+      overflow: visible;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .note-sketch text { fill: currentColor; stroke: none; font: 9px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .sketch-memory { color: #4c614b; }
+    .sketch-context { color: #4e657d; }
+    .sketch-tools { color: #85582f; }
+    .sketch-evals { color: #725875; }
+    .sketch-piece { transform-box: fill-box; transform-origin: center; animation: sketch-arrive 500ms cubic-bezier(.2, .8, .3, 1.2) both; }
+    .sketch-piece:nth-child(2) { animation-delay: 80ms; }
+    .sketch-piece:nth-child(3) { animation-delay: 160ms; }
+    .sketch-piece:nth-child(4) { animation-delay: 240ms; }
+
+    @keyframes note-arrive {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes sketch-arrive {
+      from { opacity: 0; transform: translateY(7px) rotate(-6deg) scale(.92); }
+      to { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .project-symbol, .project-arrow { transition: none; }
+      .project-symbol, .project-arrow, .topic { transition: none; }
       .project-link:hover .project-symbol, .project-link:hover .project-arrow { transform: none; }
+      .topic:hover, .topic:nth-child(even):hover, .topic:active { transform: none; }
+      .note, .sketch-piece { animation: none; }
     }
 
     @media (max-width: 480px) {
@@ -237,9 +296,12 @@
       .bio .lead { font-size: 19px; }
       .bio p { font-size: 16px; }
       .projects { margin-top: 52px; }
-      .notebook { padding: 20px; }
-      .topics { justify-content: space-between; gap: 8px; }
-      .note-content { min-height: 150px; }
+      .notebook { padding: 20px 16px 12px; }
+      .topics { gap: 6px; }
+      .topic { flex-direction: column; gap: 5px; padding: 10px 4px; font-size: 11px; }
+      .note { grid-template-columns: minmax(0, 1fr) 84px; gap: 10px; min-height: 200px; }
+      .note-title { font-size: 21px; }
+      .note-sketch { width: 84px; height: 84px; }
       footer { margin-top: 32px; gap: 16px; }
     }
   </style>
@@ -262,30 +324,73 @@
     <section class="notebook" aria-labelledby="notebook-heading">
       <div class="notebook-heading">
         <h2 id="notebook-heading">Agent notebook</h2>
-        <span class="notebook-hint">Pick a topic</span>
+        <span class="notebook-hint">Pick a rabbit hole &darr;</span>
       </div>
-      <div class="topics" role="group" aria-label="Agent notebook topics">
-        <button class="topic" type="button" aria-pressed="true" aria-controls="note-memory">Memory</button>
-        <button class="topic" type="button" aria-pressed="false" aria-controls="note-context">Context</button>
-        <button class="topic" type="button" aria-pressed="false" aria-controls="note-tools">Tools</button>
-        <button class="topic" type="button" aria-pressed="false" aria-controls="note-evals">Evals</button>
+      <div class="topics" role="tablist" aria-label="Agent notebook topics">
+        <button class="topic" id="tab-memory" type="button" role="tab" aria-selected="true" aria-controls="note-memory">
+          <svg class="topic-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 7 6-3 8 3-6 3Z M5 12l8 3 6-3 M5 17l8 3 6-3 M5 7v10 M19 7v10"/></svg>
+          Memory
+        </button>
+        <button class="topic" id="tab-context" type="button" role="tab" aria-selected="false" aria-controls="note-context" tabindex="-1">
+          <svg class="topic-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4 M16 4h4v4 M4 16v4h4 M20 16v4h-4"/><circle cx="12" cy="12" r="3"/></svg>
+          Context
+        </button>
+        <button class="topic" id="tab-tools" type="button" role="tab" aria-selected="false" aria-controls="note-tools" tabindex="-1">
+          <svg class="topic-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5-5 7 5 7 M16 5l5 7-5 7 M14 4l-4 16"/></svg>
+          Tools
+        </button>
+        <button class="topic" id="tab-evals" type="button" role="tab" aria-selected="false" aria-controls="note-evals" tabindex="-1">
+          <svg class="topic-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 2 2 4-4 M13 7h7 M4 16l2 2 4-4 M13 16h7"/></svg>
+          Evals
+        </button>
       </div>
-      <div class="note-content" aria-live="polite" aria-atomic="true">
-        <article class="note" id="note-memory">
-          <h3 class="note-title">Remember the useful part.</h3>
-          <p>Carry forward decisions, preferences, and lessons&mdash;with enough provenance to revisit them.</p>
+      <div class="note-content">
+        <article class="note" id="note-memory" role="tabpanel" aria-labelledby="tab-memory" tabindex="0">
+          <div>
+            <h3 class="note-title">We&rsquo;ve met. Several times.</h3>
+            <p>Keep the decisions, preferences, and lessons&mdash;with receipts. Every new session shouldn&rsquo;t be a first date.</p>
+          </div>
+          <svg class="note-sketch sketch-memory" viewBox="0 0 128 128" aria-hidden="true">
+            <g class="sketch-piece"><rect x="30" y="20" width="70" height="72" rx="5" fill="#e2e8d9" transform="rotate(9 65 56)"/></g>
+            <g class="sketch-piece"><rect x="23" y="26" width="70" height="72" rx="5" fill="#edf0e5" transform="rotate(-7 58 62)"/></g>
+            <g class="sketch-piece"><rect x="25" y="30" width="70" height="72" rx="5" fill="#f8f7f4"/><path d="M37 47h32 M37 56h44 M37 65h25" opacity=".45"/><path d="m64 80 4 4 9-10"/><text x="37" y="94">receipts</text></g>
+            <path class="sketch-piece" d="m106 24 1-6 M111 29l6-2 M103 15l-2-3"/>
+          </svg>
         </article>
-        <article class="note" id="note-context" hidden>
-          <h3 class="note-title">Give attention a budget.</h3>
-          <p>Keep the goal and recent actions close. Make room for what the next step needs.</p>
+        <article class="note" id="note-context" role="tabpanel" aria-labelledby="tab-context" tabindex="0" hidden>
+          <div>
+            <h3 class="note-title">A window, not a junk drawer.</h3>
+            <p>Keep the goal in view and the useful bits close. The agent does not need all 40,000 tokens of its autobiography.</p>
+          </div>
+          <svg class="note-sketch sketch-context" viewBox="0 0 128 128" aria-hidden="true">
+            <g class="sketch-piece" opacity=".4"><rect x="9" y="25" width="30" height="14" rx="4"/><rect x="86" y="22" width="29" height="14" rx="4"/><rect x="16" y="91" width="25" height="14" rx="4"/><rect x="88" y="87" width="27" height="14" rx="4"/></g>
+            <g class="sketch-piece"><path d="M45 38H34v12 M83 38h11v12 M34 78v12h11 M94 78v12H83"/><rect x="43" y="48" width="42" height="32" rx="6" fill="#e1e8ed"/><text x="64" y="68" text-anchor="middle">the goal</text></g>
+            <g class="sketch-piece"><path d="m62 19 2 7 2-7 M62 109l2-7 2 7"/></g>
+          </svg>
         </article>
-        <article class="note" id="note-tools" hidden>
-          <h3 class="note-title">Make intent concrete.</h3>
-          <p>Clear inputs, explicit state, and outcomes an agent can check before taking the next step.</p>
+        <article class="note" id="note-tools" role="tabpanel" aria-labelledby="tab-tools" tabindex="0" hidden>
+          <div>
+            <h3 class="note-title">Less &ldquo;on it.&rdquo; More done.</h3>
+            <p>Clear inputs. Checkable results. Ideally, the agent does the thing before announcing it has done the thing.</p>
+          </div>
+          <svg class="note-sketch sketch-tools" viewBox="0 0 128 128" aria-hidden="true">
+            <g class="sketch-piece"><rect x="11" y="22" width="86" height="66" rx="6" fill="#f8f7f4"/><path d="M11 38h86"/><circle cx="21" cy="30" r="1"/><circle cx="27" cy="30" r="1"/><path d="m25 51 6 5-6 5 M39 62h17"/></g>
+            <g class="sketch-piece"><path d="M63 78v19h25 M82 91l6 6-6 6"/><rect x="89" y="83" width="26" height="26" rx="7" fill="#efe3cf"/><path d="m96 96 4 4 8-9"/></g>
+            <g class="sketch-piece"><path d="m76 55 2 20 5-6 7-1Z" fill="#efe3cf"/></g>
+          </svg>
         </article>
-        <article class="note" id="note-evals" hidden>
-          <h3 class="note-title">Read the whole attempt.</h3>
-          <p>Follow the trajectory, inspect the failures, and check whether the task got done.</p>
+        <article class="note" id="note-evals" role="tabpanel" aria-labelledby="tab-evals" tabindex="0" hidden>
+          <div>
+            <h3 class="note-title">Trust issues, automated.</h3>
+            <p>Read the whole attempt and check the actual result. Confidence is charming. It is also not a test.</p>
+          </div>
+          <svg class="note-sketch sketch-evals" viewBox="0 0 128 128" aria-hidden="true">
+            <path d="M22 91c0-48 35 5 40-35s42 7 42-25" stroke-dasharray="3 5" opacity=".55"/>
+            <g class="sketch-piece"><circle cx="22" cy="91" r="10" fill="#eae0eb"/><path d="m18 91 3 3 5-6"/></g>
+            <g class="sketch-piece"><circle cx="59" cy="68" r="10" fill="#f8f7f4"/><path d="m56 65 6 6 M62 65l-6 6"/></g>
+            <g class="sketch-piece"><circle cx="104" cy="31" r="13" fill="#eae0eb"/><path d="m98 31 4 4 8-9"/></g>
+            <g class="sketch-piece"><text x="80" y="106" text-anchor="middle">try, learn, repeat</text></g>
+          </svg>
         </article>
       </div>
     </section>
@@ -318,14 +423,32 @@
   <script>
     (function () {
       var notebook = document.querySelector('.notebook');
-      var topics = notebook.querySelectorAll('.topic');
-      topics.forEach(function (topic) {
+      var topics = Array.from(notebook.querySelectorAll('.topic'));
+
+      function selectTopic(topic) {
+        topics.forEach(function (button) {
+          var selected = button === topic;
+          button.setAttribute('aria-selected', String(selected));
+          button.tabIndex = selected ? 0 : -1;
+          document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
+        });
+      }
+
+      topics.forEach(function (topic, index) {
         topic.addEventListener('click', function () {
-          topics.forEach(function (button) {
-            var selected = button === topic;
-            button.setAttribute('aria-pressed', String(selected));
-            document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
-          });
+          selectTopic(topic);
+        });
+        topic.addEventListener('keydown', function (event) {
+          var next;
+          if (event.key === 'ArrowRight') next = (index + 1) % topics.length;
+          else if (event.key === 'ArrowLeft') next = (index - 1 + topics.length) % topics.length;
+          else if (event.key === 'Home') next = 0;
+          else if (event.key === 'End') next = topics.length - 1;
+          else return;
+
+          event.preventDefault();
+          selectTopic(topics[next]);
+          topics[next].focus();
         });
       });
     })();
